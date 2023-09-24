@@ -247,4 +247,103 @@ for key, value in days_of_week.items():
 
 print(days_of_week)
 ~~~
-# Deme chance de subirle mi código del proyecto aquí, por favor.
+# Proyecto del primer parcial en streamlit con comentarios de explicación paso a paso.
+~~~ python
+import streamlit as st
+
+#Clase con los datos que se pediran para cada contacto que se desee agregar.
+class Persona:
+    def __init__(self, nombre, numTel, correo, domicilio, cumple, notas):
+        self.nombre = nombre
+        self.numTel = numTel
+        self.correo = correo
+        self.domicilio = domicilio
+        self.cumple = cumple
+        self.notas = notas
+        
+#Para declarar una lista global en este programa, primero me aseguro que no exista ya una.
+if "personas_db" not in st.session_state:
+    #Una vez verificado que no existe ninguna lista global, la declaramos con "st.sessio_state" y el nombre de nuestra lista.
+    st.session_state.personas_db = [] 
+
+#Inicio de las operaciones CRUD
+#Primera operacion: CREATE - Crear nuevos registros
+def crear_persona():
+    nombre = st.text_input('Ingrese el nombre:')
+    numTel = st.number_input('Ingrese un numero de teléfono:')
+    correo = st.text_input('Ingrese el correo electrónico:')
+    domicilio = st.text_input('Ingresa tu Domicilio:')
+    cumple = st.text_input('Ingresa tu fecha de cumpleaños:')
+    notas = st.text_input('Ingresa notas adicionales:')
+    
+    if st.button("Añadir a la agenda"):
+        newperson = {
+            "nombre": nombre,
+            "Número de teléfono": numTel,
+            "Correo Electrónico": correo,
+            "Domicilio": domicilio,
+            "Fecha de Cumpleaños": cumple,
+            "Notas": notas,
+        }
+        #Al ingresar todos los datos que te solicita para un nuevo contacto, se añadirán a una variable temporal y esa variable será...
+        #...agregada posteriormente a nuestra lista global. 
+        st.session_state.personas_db.append(newperson)             
+        st.success(f"{nombre} ha sido añadido a la agenda")
+        
+#Segunda operacion: READ - Leer/Mostrar todos los registros actuales.
+def mostrar_informacion():
+    #Para poder mostrar el registro de contactos, primero verificamos que no esté vacía nuestra agenda.
+    if len(st.session_state.personas_db) > 0:
+        st.write("Lista de contactos: ", st.session_state.personas_db)
+    else:
+        st.write("No hay personas por mostrar")
+#Tercera operacion: UPDATE - actualizar/modificar registros.
+def modificar_persona():
+    #Para poder modificar un contacto, primero lo mandamos llamar desde nuestra lista donde fue almacenado anteriormente.
+    elegir = st.selectbox('Selecciona una persona', [p['nombre'] for p in st.session_state.personas_db])
+    persona = next((p for p in st.session_state.personas_db if p['nombre'] == elegir), None)
+    #Una vez sabemos que contacto modificar, los datos que queramos cambiar se van a sobre escribir en una variable temporal...
+    #...para ser añadidos de vuelta a nuestra base de datos.
+    if persona is not None:
+        persona['nombre'] = st.text_input('Ingrese el nombre:', value=persona['nombre'])
+        persona['Número de teléfono'] = st.number_input('Ingrese un numero de teléfono:', value=persona['Número de teléfono'])
+        persona['Correo Electrónico'] = st.text_input('Ingrese el correo electrónico:', value=persona['Correo Electrónico'])
+        persona['Domicilio'] = st.text_input('Ingresa tu Domicilio:', value=persona['Domicilio'])
+        persona['Fecha de Cumpleaños'] = st.text_input('Ingresa tu fecha de cumpleaños:', value=persona['Fecha de Cumpleaños'])
+        persona['Notas'] = st.text_input('Ingresa notas adicionales:', value=persona['Notas'])
+        if st.button('Realizar cambios'):
+            st.success(f"{persona['nombre']} ha sido actualizado en la agenda")
+    else:
+        st.warning("No hay personas para modificar")
+#Cuarta y ultima operacion CRUD: DELETE - Eliminar registros
+def eliminar_personas():
+    elegir = st.selectbox('Selecciona una persona', [p['nombre'] for p in st.session_state.personas_db])
+    persona = next((p for p in st.session_state.personas_db if p['nombre'] == elegir), None)
+    if persona is not None:
+        if st.button("Eliminar de la agenda"):
+            st.session_state.personas_db.remove(persona)
+            st.success(f"{persona['nombre']} ha sido eliminado de la agenda")
+    else:
+        st.warning("No existen personas para eliminar")
+
+#Interfaz del menu principal
+def main():
+    st.title("Agenda de Contactos")
+
+    #Con este "sidebar" agregamos estas cuatro opciones a una barra lateral izquierda
+    menu = st.sidebar.selectbox("Menú", ["Mostrar Contactos", "Agregar Contacto", "Modificar Contacto", "Eliminar Contacto"])
+
+    #Aquí simplemente al seleccionar la opción que necesitamos, se mmandará a llamar una de las operaciones CRUD que creamos anteriormente
+    if menu == "Mostrar Contactos":
+        mostrar_informacion()
+    elif menu == "Agregar Contacto":
+        crear_persona()
+    elif menu == "Modificar Contacto":
+        modificar_persona()
+    elif menu == "Eliminar Contacto":
+        eliminar_personas()
+
+if __name__ == "__main__":
+    main()
+
+~~~
